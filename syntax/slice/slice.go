@@ -60,19 +60,19 @@ func SubSlice() {
 func ShareSlice() {
 	s1 := []int{1, 2, 3, 4}
 	s2 := s1[2:]
-	fmt.Printf("s1:%v,len:%d cap:%d\n", s1, len(s1), cap(s1)) // 4,4
-	fmt.Printf("s2:%v,len:%d cap:%d\n", s2, len(s2), cap(s2)) // 2,4
+	fmt.Printf("s1:%v,len:%d cap:%d\n", s1, len(s1), cap(s1)) // {1,2,3,4} 4,4
+	fmt.Printf("s2:%v,len:%d cap:%d\n", s2, len(s2), cap(s2)) // {3,4} 2,2
 
 	s2[0] = 99
-	fmt.Printf("s1:%v,len:%d cap:%d\n", s1, len(s1), cap(s1))
-	fmt.Printf("s2:%v,len:%d cap:%d\n", s2, len(s2), cap(s2))
+	fmt.Printf("s1:%v,len:%d cap:%d\n", s1, len(s1), cap(s1)) // {1,2,99,4} 4,4  共享底层数组
+	fmt.Printf("s2:%v,len:%d cap:%d\n", s2, len(s2), cap(s2)) // {99,4} 2,2
 
-	//
+	// s2 cap=2, 再append一个元素 因此会出现扩容，所以他和s1不共享底层数组了
 	s2 = append(s2, 199)
-	fmt.Printf("s1:%v,len:%d cap:%d\n", s1, len(s1), cap(s1))
-	fmt.Printf("s2:%v,len:%d cap:%d\n", s2, len(s2), cap(s2))
+	fmt.Printf("s1:%v,len:%d cap:%d\n", s1, len(s1), cap(s1)) // {1,2,99,4} 4 4
+	fmt.Printf("s2:%v,len:%d cap:%d\n", s2, len(s2), cap(s2)) // {99,4,199} 3,4 扩原来cap的两倍
 
-	s2[1] = 1999
-	fmt.Printf("s1:%v,len:%d cap:%d\n", s1, len(s1), cap(s1))
+	s2[1] = 1999                                              // 不会修改s1的值，不再共享底层数组
+	fmt.Printf("s1:%v,len:%d cap:%d\n", s1, len(s1), cap(s1)) //
 	fmt.Printf("s2:%v,len:%d cap:%d\n", s2, len(s2), cap(s2))
 }
