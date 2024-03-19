@@ -3,7 +3,8 @@ package main
 import "fmt"
 
 func main() {
-	LoopBug()
+	//LoopBug()
+	Cal()
 }
 
 func forArray() {
