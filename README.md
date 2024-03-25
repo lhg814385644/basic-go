@@ -21,3 +21,6 @@ https://ohmyposh.dev/docs/installation/linux
    eval "$(/home/hg/ohmyposh/bin/oh-my-posh init bash --config ~/.cache/oh-my-posh/themes/easy-term.omp.json)"
 3. 重新加载配置文件
    source .profile
+
+# 1期仓库
+https://gitee.com/geektime-geekbang_admin/geektime-basic-go/tree/record
