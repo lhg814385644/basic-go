@@ -66,3 +66,18 @@ func (svc *UserService) Profile(ctx context.Context, id int) (domain.User, error
 	}
 	return *user, nil
 }
+
+// UpdateProfile 编辑个人信息
+func (svc *UserService) UpdateProfile(ctx context.Context, user domain.User) error {
+	if err := svc.userRepo.Update(ctx, map[string]interface{}{
+		"nick_name":    user.NickName,
+		"birthday":     user.Birthday,
+		"introduction": user.Introduction,
+	}, user.ID); err != nil {
+		if err == repository.ErrUserNotFound {
+			return ErrUserNotFound
+		}
+		return err
+	}
+	return nil
+}

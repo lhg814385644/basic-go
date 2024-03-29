@@ -60,13 +60,29 @@ func (ud *UserDao) FindByID(ctx context.Context, id int) (*Users, error) {
 	return nil, err
 }
 
+// Update 更新用户
+func (ud *UserDao) Update(ctx context.Context, updateFiled map[string]interface{}, id int) error {
+	var user Users
+	if err := ud.db.WithContext(ctx).First(&user, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return ErrUserNotFound
+		}
+		return err
+	}
+	return ud.db.WithContext(ctx).Model(&user).Updates(updateFiled).Error
+}
+
 // Users 用户表
 type Users struct {
-	ID       int    `gorm:"primaryKey,autoIncrement"` // ID主键，自增（TODO:面试常考 自增主键的好处？？ // ）
-	Email    string `gorm:"unique"`                   // 邮箱，唯一索引
-	Password string
-	CTime    int64 // 创建时间
-	UTime    int64 // 更新时间
+	ID           int    `gorm:"primaryKey,autoIncrement"` // ID主键，自增（TODO:面试常考 自增主键的好处？？ // ）
+	Email        string `gorm:"unique"`                   // 邮箱，唯一索引
+	Password     string
+	NickName     string `gorm:"type:varchar(50)"`  // 昵称
+	Birthday     string `gorm:"type:varchar(20)"`  // 生日
+	Introduction string `gorm:"type:varchar(200)"` // 简介
+	CTime        int64  // 创建时间
+	UTime        int64  // 更新时间
+
 }
 
 // InitTable 初始化表(采用GORM的AutoMigrate)

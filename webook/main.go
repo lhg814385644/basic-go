@@ -81,15 +81,17 @@ type SignInMiddlewareBuilder struct {
 func (*SignInMiddlewareBuilder) SignInCheck() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 不需要校验的路径
-		if ctx.Request.URL.Path == "/users/signIn" || ctx.Request.URL.Path == "users/signUp" {
+		if ctx.Request.URL.Path == "/users/signIn" || ctx.Request.URL.Path == "/users/signUp" {
 			return
 		}
 		session := sessions.Default(ctx)
 		// 验证
-		if session.Get("userID") == nil {
+		userID := session.Get("userID")
+		if userID == nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 		// TODO: 如果能取到，将该userID放到上下文context中向下传播
+		ctx.Set(web.UserIDCTXKEY, userID)
 	}
 }

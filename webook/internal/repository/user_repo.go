@@ -56,13 +56,26 @@ func (up *UserRepo) FindByID(ctx context.Context, id int) (*domain.User, error) 
 	user, err := up.userDao.FindByID(ctx, id)
 	if err == nil {
 		return &domain.User{
-			ID:       user.ID,
-			Email:    user.Email,
-			Password: user.Password,
+			ID:           user.ID,
+			Email:        user.Email,
+			Password:     user.Password,
+			Birthday:     user.Birthday,
+			NickName:     user.NickName,
+			Introduction: user.Introduction,
 		}, nil
 	}
 	if err == dao.ErrUserNotFound {
 		return nil, ErrUserNotFound
 	}
 	return nil, err
+}
+
+func (up *UserRepo) Update(ctx context.Context, updateFiled map[string]interface{}, id int) error {
+	if err := up.userDao.Update(ctx, updateFiled, id); err != nil {
+		if err == dao.ErrUserNotFound {
+			return ErrUserNotFound
+		}
+		return err
+	}
+	return nil
 }

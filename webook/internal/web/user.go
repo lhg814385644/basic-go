@@ -27,6 +27,7 @@ const (
 	emailRegexPattern    = "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"
 	passwordRegexPattern = `^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$`
 	userIDKey            = "userID"
+	UserIDCTXKEY         = "UserIDCTXKEY"
 )
 
 // RegisterRoutes 注册路由
@@ -116,7 +117,7 @@ func (h *UserHandler) SignIn(ctx *gin.Context) {
 	// TODO: set session
 	session := sessions.Default(ctx)
 	session.Options(sessions.Options{
-		MaxAge: 120, // 过期时间(S)
+		MaxAge: 360, // 过期时间(S)
 	})
 	session.Set(userIDKey, user.ID)
 	err = session.Save()
@@ -130,32 +131,59 @@ func (h *UserHandler) SignIn(ctx *gin.Context) {
 // Profile 查询用户信息
 func (h *UserHandler) Profile(ctx *gin.Context) {
 	type profile struct {
-		ID    int    `json:"id"`
-		Email string `json:"email"`
+		ID           int    `json:"id"`
+		Email        string `json:"email"`
+		NickName     string `json:"nick_name"`    // 昵称
+		Birthday     string `json:"birthday"`     // 生日
+		Introduction string `json:"introduction"` // 简介
 	}
-	sess := sessions.Default(ctx)
-	if userID, ok := sess.Get(userIDKey).(int); ok {
-		user, err := h.userSvc.Profile(ctx, userID)
-		if err == service.ErrUserNotFound {
-			ctx.String(http.StatusOK, "用户不存在")
-			return
-		}
-		if err != nil {
-			ctx.String(http.StatusOK, "服务器异常")
-			return
-		}
-		ctx.JSON(http.StatusOK, gin.H{
-			"data": profile{
-				ID:    user.ID,
-				Email: user.Email,
-			},
-		})
+	userID := ctx.GetInt(UserIDCTXKEY)
+	user, err := h.userSvc.Profile(ctx, userID)
+	if err == service.ErrUserNotFound {
+		ctx.String(http.StatusOK, "用户不存在")
 		return
 	}
-	ctx.String(http.StatusUnauthorized, "login failed")
+	if err != nil {
+		ctx.String(http.StatusOK, "服务器异常")
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": profile{
+			ID:           user.ID,
+			Email:        user.Email,
+			NickName:     user.NickName,
+			Birthday:     user.Birthday,
+			Introduction: user.Introduction,
+		},
+	})
 }
 
 // Edit 修改信息
 func (h *UserHandler) Edit(ctx *gin.Context) {
-
+	type profile struct {
+		NickName     string `json:"nick_name"`    // 昵称
+		Birthday     string `json:"birthday"`     // 生日
+		Introduction string `json:"introduction"` // 简介
+	}
+	req := profile{}
+	if err := ctx.Bind(&req); err != nil {
+		ctx.String(http.StatusOK, "系统错误")
+		return
+	}
+	userID := ctx.GetInt(UserIDCTXKEY)
+	err := h.userSvc.UpdateProfile(ctx, domain.User{
+		ID:           userID,
+		NickName:     req.NickName,
+		Birthday:     req.Birthday,
+		Introduction: req.Introduction,
+	})
+	if err == service.ErrUserNotFound {
+		ctx.String(http.StatusOK, "用户不存在")
+		return
+	}
+	if err != nil {
+		ctx.String(http.StatusOK, "服务器异常")
+		return
+	}
+	ctx.String(http.StatusOK, "修改成功")
 }
