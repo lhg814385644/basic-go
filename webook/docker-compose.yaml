@@ -17,3 +17,14 @@ services:
     ports:
       #      - 外部访问用 13306
       - 13306:3306
+
+
+  redis:
+    image: "bitnami/redis:latest"
+    restart: always
+    environment:
+    # 允许无密码登录
+      - ALLOW_EMPTY_PASSWORD=yes
+    #  - REDIS_PASSWORD=bb123456 配置使用密码(bb123456)登录
+    ports:
+      - '16379:6379'

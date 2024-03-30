@@ -117,7 +117,7 @@ func (h *UserHandler) SignIn(ctx *gin.Context) {
 	// TODO: set session
 	session := sessions.Default(ctx)
 	session.Options(sessions.Options{
-		MaxAge: 360, // 过期时间(S)
+		MaxAge: 60, // 过期时间(S)
 	})
 	session.Set(userIDKey, user.ID)
 	err = session.Save()
