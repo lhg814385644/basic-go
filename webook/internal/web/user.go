@@ -4,9 +4,11 @@ import (
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/lhg814385644/basic-go/webook/internal/domain"
 	"github.com/lhg814385644/basic-go/webook/internal/service"
 	"net/http"
+	"time"
 )
 
 type UserHandler struct {
@@ -40,7 +42,8 @@ func (h *UserHandler) RegisterRoutes(server *gin.Engine) {
 	ug := server.Group("/users")
 
 	ug.POST("/signUp", h.SignUp)
-	ug.POST("/signIn", h.SignIn)
+	// ug.POST("/signIn", h.SignIn)
+	ug.POST("/signIn", h.LoginJWT)
 	ug.POST("/edit", h.Edit)
 	ug.GET("/profile", h.Profile)
 }
@@ -128,6 +131,45 @@ func (h *UserHandler) SignIn(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "sign ok")
 }
 
+// LoginJWT 登录 JWT方式
+func (h *UserHandler) LoginJWT(ctx *gin.Context) {
+	type SignInReq struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	req := &SignInReq{}
+	if err := ctx.Bind(req); err != nil {
+		ctx.String(http.StatusBadRequest, "bind error")
+	}
+	user, err := h.userSvc.SignIn(ctx, req.Email, req.Password)
+	if err == service.ErrInvalidUserOrPassword {
+		ctx.String(http.StatusOK, "无效的邮箱或密码")
+		return
+	}
+	if err != nil {
+		ctx.String(http.StatusOK, "服务器异常")
+		return
+	}
+	// TODO: set session
+	// TODO: UserClaims
+	uc := UserClaims{
+		Uid: user.ID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			// 过期时间
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 1)),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, uc)
+	tokenStr, err := token.SignedString(JWTKey) // 得到一个完整签名的JWT token
+	if err != nil {
+		ctx.String(http.StatusOK, "服务器异常")
+		return
+	}
+	// 响应头中设置token
+	ctx.Header("x-jwt-token", tokenStr)
+	ctx.String(http.StatusOK, "sign ok")
+}
+
 // Profile 查询用户信息
 func (h *UserHandler) Profile(ctx *gin.Context) {
 	type profile struct {
@@ -187,3 +229,11 @@ func (h *UserHandler) Edit(ctx *gin.Context) {
 	}
 	ctx.String(http.StatusOK, "修改成功")
 }
+
+// UserClaims 用户声明
+type UserClaims struct {
+	jwt.RegisteredClaims
+	Uid int // 用户ID
+}
+
+var JWTKey = []byte("vTTI7yzD0O3H7zYx4vKqda0IBKrKN5b9")

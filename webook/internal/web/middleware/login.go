@@ -19,7 +19,7 @@ type SignInMiddlewareBuilder struct {
 }
 
 // CheckLogin 检查登录中间件
-func (*SignInMiddlewareBuilder) CheckLogin() gin.HandlerFunc {
+func (s *SignInMiddlewareBuilder) CheckLogin() gin.HandlerFunc {
 	// 注册一下GOB
 	gob.Register(time.Now())
 	return func(ctx *gin.Context) {

@@ -34,7 +34,8 @@ func initWebServer() *gin.Engine {
 			}
 			return strings.Contains(origin, "your_company.com")
 		},
-		AllowedHeaders:   []string{"Content-Type"},
+		ExposedHeaders:   []string{"X-Jwt-Token"},                   // 允许的响应头(主要是方便浏览器读取该值)
+		AllowedHeaders:   []string{"Content-Type", "Authorization"}, // 允许的请求头
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
@@ -52,7 +53,8 @@ func initWebServer() *gin.Engine {
 	// cookie的名字ssid
 	server.Use(sessions.Sessions("ssid", store))
 	// 登录校验
-	login := &middleware.SignInMiddlewareBuilder{}
+	// login := &middleware.SignInMiddlewareBuilder{}
+	login := &middleware.LoginJWTMiddlewareBuilder{}
 	server.Use(login.CheckLogin())
 	return server
 }
