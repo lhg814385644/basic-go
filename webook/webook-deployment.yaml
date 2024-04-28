@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webook-record-service
+spec:
+  # 3个副本
+  replicas: 3
+  selector:
+    matchLabels:
+      app: webook-record
+  template:
+    metadata:
+      labels:
+        #   这个webook-record一定要和前面的selector的matchLabels匹配上
+        app: webook-record
+    #       这个是Deployment管理的Pod模板（具体的规格说明）
+    spec:
+      containers:
+        - name: webook-record
+          image: hgfly/webook:dev
+          ports:
+            # 在我们main函数中，我们监听了8080端口
+            - containerPort: 8080
+

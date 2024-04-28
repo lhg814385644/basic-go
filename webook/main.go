@@ -12,14 +12,34 @@ import (
 	"github.com/lhg814385644/basic-go/webook/internal/web/middleware"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"net/http"
 	"strings"
 	"time"
 )
 
 func main() {
-	db := initDB()
-	server := initWebServer()
-	initUser(server, db)
+	// db := initDB()
+	// server := initWebServer()
+	// initUser(server, db)
+
+	server := gin.Default()
+	server.GET("/hello", func(ctx *gin.Context) {
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"msg":       "hello",
+			"errorMsg":  "errorMsg",
+			"success":   true,
+			"userName":  "13520516167",
+			"userId":    2366,
+			"name":      "阿克苏京",
+			"gender":    2,
+			"token":     "2089093e9a832c66cede8c782d03797d",
+			"mobileNum": 13520516167,
+			"riderJd":   1,
+			"isTaking":  1,
+			"Tab_show":  1,
+		})
+	})
 	server.Run(":8080")
 }
 
