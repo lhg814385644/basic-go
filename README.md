@@ -24,3 +24,20 @@ https://ohmyposh.dev/docs/installation/linux
 
 # 1期仓库
 https://gitee.com/geektime-geekbang_admin/geektime-basic-go/tree/record
+
+
+# Linux（Ubuntu22.04 LTS）上安装kubectl
+官方文档：https://kubernetes.io/zh-cn/docs/tasks/tools/install-kubectl-linux/
+1. 下载kubectl(由于我的k8s版本是1.29.2，所以下载的是1.29.2的kubectl)
+curl -LO https://dl.k8s.io/release/v1.29.2/bin/linux/amd64/kubectl
+2. 安装kubectl
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+3. 验证安装
+kubectl version --client
+
+
+### 初步在k8s中部署Web应用
+1. 创建一个Deployment(创建完成后执行如下命令)
+kubectl apply -f webook-deployment.yaml
+2. 创建一个Service(创建完成后执行如下命令)
+kubectl apply -f webook-service.yaml
